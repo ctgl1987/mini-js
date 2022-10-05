@@ -119,7 +119,7 @@ const DisplayManager = (function(){
 
 const ScreenManager = (function(){
 
-    var current = [];
+    var stack = [];
 
     var _screens = [];
 
@@ -129,6 +129,12 @@ const ScreenManager = (function(){
             _screens[screen.name] = screen;
 
         },
+        /**
+         * Replace all screens into Stack
+         * 
+         * @param {String} name 
+         * @returns 
+         */
         change: function(name){
             if(!_screens[name])
             {
@@ -136,11 +142,51 @@ const ScreenManager = (function(){
                 return;
             }
 
+            stack.forEach((s) => {
+                s.leave();
+            });
+
             var next = _screens[name];
 
             next.enter();
 
-            current = [next];
+            stack = [next];
+        },
+        /**
+         * Append new Screen to Stack
+         * 
+         * @param {String} name 
+         * @returns 
+         */
+        push: function(name){
+            
+            if(!_screens[name])
+            {
+                console.error("no scene " + name);
+                return;
+            }
+
+            this.current().pause();
+
+            var next = _screens[name];
+
+            next.enter();
+
+            stack.unshift(next);
+        },
+        pop: function(){
+            if(stack.length < 2)
+            {
+                console.error("can't pop!");
+                return;
+            }
+
+            var prev = stack.shift();
+            console.log(prev, stack);
+
+            prev.leave();
+
+            this.current().resume();
         },
         input: function(evt, code){
             this.current() && this.current().input(evt, code);
@@ -149,10 +195,16 @@ const ScreenManager = (function(){
             this.current() && this.current().update(dt);
         },
         render: function(){
-            this.current() && this.current().render();
+            var tempStack = stack.slice().reverse();
+            tempStack.forEach((s) => {
+                s.render();
+            });
         },
         current: function(){
-            return current[0];
+            return stack[0];
+        },
+        all: function(){
+            return stack;
         },
     };
 }());
@@ -163,12 +215,16 @@ const BaseScreen = function(name){
     this.name = name;
 
     this.enter = function(){};
+    this.leave = function(){};
+
+    this.pause = function(){};
+    this.resume = function(){};
 
     this.input = function(evt, code){};
     this.update = function(dt){};
     this.render = function(){};
 
-    this.leave = function(){};
+    
 };
 
 const Counter = function(max){
@@ -184,5 +240,9 @@ const Counter = function(max){
 
     this.ended = function(){
         return v <= 0;
+    };
+
+    this.reset = function(){
+        v = max;
     };
 };
