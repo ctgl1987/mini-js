@@ -1,5 +1,9 @@
+//PROTO THINGS
 Object.prototype.extends = function(child){
+
     child.prototype = parent.prototype;
+    console.log(child);
+    //child.prototype.super = console.log;
 
     return child;
 };
