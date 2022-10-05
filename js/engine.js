@@ -158,7 +158,6 @@ const ScreenManager = (function(){
 }());
 
 //OBJECTS
-
 const BaseScreen = function(name){
 
     this.name = name;
