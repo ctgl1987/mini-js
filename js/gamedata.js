@@ -95,8 +95,6 @@ const PauseScreen = BaseScreen.extends(function(){
 
     BaseScreen.call(this, 'pause');
 
-    this.super("lol");
-
     var color = Tools.randomColor();
 
     this.input = function(evt, code){
