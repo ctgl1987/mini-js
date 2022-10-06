@@ -1,4 +1,4 @@
-const LoaderScreen = BaseScreen.extends(function(){
+function LoaderScreen(){
 
     BaseScreen.call(this, 'loader');
 
@@ -19,8 +19,9 @@ const LoaderScreen = BaseScreen.extends(function(){
         DisplayManager.fillRect(0, 0, CONFIG.GAME_WIDTH, CONFIG.GAME_HEIGHT, 'black');
         DisplayManager.fillText("Cargando...", CONFIG.GAME_WIDTH/2, CONFIG.GAME_HEIGHT/2, {color: color, align: 'center', valign: 'middle', size: 60});
     };
-});
-const IntroScreen = BaseScreen.extends(function(){
+};
+
+function IntroScreen(){
 
     BaseScreen.call(this, 'intro');
 
@@ -45,11 +46,12 @@ const IntroScreen = BaseScreen.extends(function(){
         DisplayManager.fillRect(0, 0, CONFIG.GAME_WIDTH, CONFIG.GAME_HEIGHT, 'black');
         DisplayManager.fillText("**Intro**", CONFIG.GAME_WIDTH/2, CONFIG.GAME_HEIGHT/2, {color: color, align: 'center', valign: 'middle', size: 60});
     };
-});
+};
 
-const TestScreen = BaseScreen.extends(function(){
+function TestScreen(){
 
     BaseScreen.call(this, 'test');
+    //this.super('test');
 
     var color = Tools.randomColor();
 
@@ -89,9 +91,9 @@ const TestScreen = BaseScreen.extends(function(){
         DisplayManager.fillRect(0, 0, CONFIG.GAME_WIDTH, CONFIG.GAME_HEIGHT, 'black');
         DisplayManager.fillText("HOLA MUNDO!!!", 0, 0, {color: color, size: 20});
     };
-});
+};
 
-const PauseScreen = BaseScreen.extends(function(){
+function PauseScreen(){
 
     BaseScreen.call(this, 'pause');
 
@@ -111,4 +113,4 @@ const PauseScreen = BaseScreen.extends(function(){
         DisplayManager.fillRect(0, 0, CONFIG.GAME_WIDTH, CONFIG.GAME_HEIGHT, 'rgba(10,10,10, 0.5)');
         DisplayManager.fillText("**PAUSEEEE**", CONFIG.GAME_WIDTH/2, CONFIG.GAME_HEIGHT/2, {color: color, align: 'center', valign: 'middle', size: 60});
     };
-});
+};

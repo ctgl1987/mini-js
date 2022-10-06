@@ -1,9 +1,17 @@
 //PROTO THINGS
 Object.prototype.extends = function(child){
 
-    child.prototype = parent.prototype;
+    child.prototype = this.prototype;
+    child.prototype.constructor = child.constructor;
 
     return child;
+};
+
+Object.prototype.parentFrom = function(parent){
+
+    console.log([parent, this]);
+    this.prototype = new parent();
+    this.prototype.constructor = this;
 };
 
 const Tools = {
@@ -98,8 +106,6 @@ const DisplayManager = (function(){
     return {
         init: function(ctx){
             _ctx = ctx;
-            // _ctx.textBaseline = 'top';
-            // _ctx.font = default_font_size + 'px ' + default_font_family;
         },
         fillRect: function(x, y, w, h, c){
             _ctx.fillStyle = c || 'black';
@@ -113,7 +119,6 @@ const DisplayManager = (function(){
             _ctx.textAlign = opts.align || 'left';
             _ctx.textBaseline = opts.valign || 'top';
             _ctx.fillText(text, x, y);
-
         },
     };
 
@@ -208,11 +213,14 @@ const ScreenManager = (function(){
         all: function(){
             return stack;
         },
+        screens: function(){
+            return _screens;
+        },
     };
 }());
 
 //OBJECTS
-const BaseScreen = function(name){
+function BaseScreen(name){
 
     this.name = name;
 
@@ -225,11 +233,9 @@ const BaseScreen = function(name){
     this.input = function(evt, code){};
     this.update = function(dt){};
     this.render = function(){};
+}
 
-    
-};
-
-const Counter = function(max){
+function Counter(max){
     var v = max;
 
     this.val = function(){
@@ -247,4 +253,29 @@ const Counter = function(max){
     this.reset = function(){
         v = max;
     };
-};
+}
+
+function Person(firstName, lastName) {
+    this.FirstName = firstName || "unknown";
+    this.LastName = lastName || "unknown";            
+}
+
+Person.prototype.getFullName = function () {
+    return this.FirstName + " " + this.LastName;
+}
+function Student(firstName, lastName, schoolName, grade)
+{
+    Person.call(this, firstName, lastName);
+
+    this.SchoolName = schoolName || "unknown";
+    this.Grade = grade || 0;
+}
+//Student.prototype = Person.prototype;
+Student.prototype = new Person();
+Student.prototype.constructor = Student;
+
+var std = new Student("James","Bond", "XYZ", 10);
+            
+// alert(std.getFullName()); // James Bond
+// alert(std instanceof Student); // true
+// alert(std instanceof Person); // true
