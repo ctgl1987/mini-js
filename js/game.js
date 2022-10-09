@@ -31,9 +31,11 @@ const Game = function(props){
 
         //screens
         ScreenManager.add(new LoaderScreen());
-        ScreenManager.add(new IntroScreen());
-        ScreenManager.add(new TestScreen());
+        ScreenManager.add(new IntroScreen('play'));
+        // ScreenManager.add(new TestScreen());
+        ScreenManager.add(new PlayScreen());
         ScreenManager.add(new PauseScreen());
+        ScreenManager.add(new GameOverScreen());
 
         var engine = new Engine();
 

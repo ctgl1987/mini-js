@@ -22,7 +22,37 @@ const Tools = {
             output += (Math.floor(Math.random() * 16)).toString(16);
         }
         return '#' + output;
-    }
+    },
+    keepInside: function(area, target){
+        //left
+        if(target.x < area.x) target.x = area.x;
+        //top
+        if(target.y < area.y) target.y = area.y;
+        //right
+        if(target.right() > area.right())
+        {
+            target.x = area.right() - target.width;
+        }
+        //bottom
+        if(target.bottom() > area.bottom()) target.y = area.bottom() - target.height;
+    },
+    clamp: function(num, min, max){
+        return Math.min(Math.max(num, min), max);
+    },
+    toZero: function(num, limit){
+        return Math.abs(num) < limit ? 0 : num;
+    },
+    getRandomInt: function(min, max){
+        min = Math.ceil(min);
+        max = Math.floor(max);
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    },
+    collision: function(rect1, rect2){
+        return (rect1.x < rect2.x + rect2.width &&
+            rect1.x + rect1.width > rect2.x &&
+            rect1.y < rect2.y + rect2.height &&
+            rect1.height + rect1.y > rect2.y);
+    },
 };
 
 //ENGINE
@@ -107,6 +137,10 @@ const DisplayManager = (function(){
         init: function(ctx){
             _ctx = ctx;
         },
+        strokeRect: function(x, y, w, h, c){
+            _ctx.strokeStyle = c || 'black';
+            _ctx.strokeRect(x, y, w, h);
+        },
         fillRect: function(x, y, w, h, c){
             _ctx.fillStyle = c || 'black';
             _ctx.fillRect(x, y, w, h);
@@ -115,11 +149,14 @@ const DisplayManager = (function(){
             opts = opts || {};
 
             _ctx.fillStyle = opts.color || 'white';
-            _ctx.font = (opts.size || default_font_size)  + 'px ' + (opts.font || default_font_family);
+            _ctx.font = (opts.style || 'normal') + " " + (opts.size || default_font_size)  + 'px ' + (opts.font || default_font_family);
             _ctx.textAlign = opts.align || 'left';
             _ctx.textBaseline = opts.valign || 'top';
             _ctx.fillText(text, x, y);
         },
+        drawImage: function(img, sx, sy, sw, sh, dx, dy, dw, dh){
+            _ctx.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh);
+        }
     };
 
 }());
@@ -189,7 +226,6 @@ const ScreenManager = (function(){
             }
 
             var prev = stack.shift();
-            console.log(prev, stack);
 
             prev.leave();
 
@@ -215,6 +251,59 @@ const ScreenManager = (function(){
         },
         screens: function(){
             return _screens;
+        },
+    };
+}());
+
+const ImageManager = (function(){
+
+    var _list = [];
+    var images = {};
+    var total = 0;
+    var count = 0;
+
+    var base_path = "";
+
+    var _callback = null;
+
+    function run()
+    {
+        total = _list.length;
+
+        _callback && _callback(count, total);
+
+        _list.forEach((i) => {
+
+            let img = new Image();
+
+            img.onload = function(){
+
+                images[i.name] = img;
+                count++;
+                // console.log(i.name + " loaded");
+                _callback && _callback(count, total);
+            };
+
+            img.src = base_path + i.src;
+        });
+    }
+
+    return {
+        path: function(p){
+            base_path = p;
+        },
+        add: function(props){
+            var temp = Array.isArray(props) ? props : [props];
+
+            _list = [].concat(_list, temp);            
+        },
+        load: function(callback){
+            _callback = callback;
+
+            run();
+        },
+        get: function(name){
+            return images[name] ? images[name] : null;
         },
     };
 }());
@@ -255,27 +344,32 @@ function Counter(max){
     };
 }
 
-function Person(firstName, lastName) {
-    this.FirstName = firstName || "unknown";
-    this.LastName = lastName || "unknown";            
-}
+function Sprite(image, fps, frameWidth, frameHeight){
 
-Person.prototype.getFullName = function () {
-    return this.FirstName + " " + this.LastName;
-}
-function Student(firstName, lastName, schoolName, grade)
-{
-    Person.call(this, firstName, lastName);
+    var counter = 0;
+    var maxFrameX = Math.round(image.width / frameWidth);
 
-    this.SchoolName = schoolName || "unknown";
-    this.Grade = grade || 0;
-}
-//Student.prototype = Person.prototype;
-Student.prototype = new Person();
-Student.prototype.constructor = Student;
+    this.image = image;
 
-var std = new Student("James","Bond", "XYZ", 10);
-            
-// alert(std.getFullName()); // James Bond
-// alert(std instanceof Student); // true
-// alert(std instanceof Person); // true
+    this.frameWidth = frameWidth;
+    this.frameHeight = frameHeight;
+
+    this.frameX = 0;
+
+    this.update = function(dt){
+
+        counter += dt;
+
+        if(counter >= fps)
+        {
+            counter = 0;
+
+            this.frameX++;
+
+            if(this.frameX >= maxFrameX)
+            {
+                this.frameX = 0;
+            }
+        }
+    };
+}
